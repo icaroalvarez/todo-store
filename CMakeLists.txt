@@ -8,3 +8,4 @@ conan_basic_setup(TARGETS)
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(test_benchmarks)

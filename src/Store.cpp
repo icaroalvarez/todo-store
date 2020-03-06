@@ -30,11 +30,12 @@ void Store::update(std::int64_t id, const TodoProperties &properties)
 
 TodoProperties Store::get(std::int64_t id) const
 {
-    TodoProperties todoProperties;
-    todoProperties["title"]=todos.at(id).title;
-    todoProperties["description"]=todos.at(id).description;
-    todoProperties["timestamp"]=todos.at(id).timestamp;
-    return todoProperties;
+    auto todo{todos.at(id)};
+    return {
+        {"title", todo.title},
+        {"description", todo.description},
+        {"timestamp", todo.timestamp}
+    };
 }
 
 void Store::remove(std::int64_t id)

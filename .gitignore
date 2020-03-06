@@ -1,2 +1,3 @@
 .conan
 .idea
+cmake-build*
