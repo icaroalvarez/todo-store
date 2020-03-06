@@ -1,0 +1,1 @@
+/usr/bin/c++    -g   CMakeFiles/test_entity_store.dir/main.test.cpp.o CMakeFiles/test_entity_store.dir/Store.Test.cpp.o  -o ../bin/test_entity_store ../lib/libentity_store.a 

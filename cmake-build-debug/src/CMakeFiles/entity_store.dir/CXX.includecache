@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ialvarez/Code/entity-store/src/Store.cpp
+vector
+-
+Store.h
+/home/ialvarez/Code/entity-store/src/Store.h
+
+/home/ialvarez/Code/entity-store/src/Store.h
+Todo.h
+/home/ialvarez/Code/entity-store/src/Todo.h
+unordered_map
+-
+
+/home/ialvarez/Code/entity-store/src/Todo.h
+string
+-
+any
+-
+unordered_map
+-
+

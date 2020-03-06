@@ -1,0 +1,11 @@
+/home/ialvarez/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/193.5662.56/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/ialvarez/Code/entity-store
+-- Conan: Adjusting output directories
+-- Conan: Using cmake targets configuration
+-- Conan: Adjusting default RPATHs Conan policies
+-- Conan: Adjusting language standard
+-- Current conanbuildinfo.cmake directory: /home/ialvarez/Code/entity-store/.conan
+-- Conan: Compiler GCC>=5, checking major version 7
+-- Conan: Checking correct version: 7
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ialvarez/Code/entity-store/cmake-build-debug

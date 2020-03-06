@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libentity_store.a  CMakeFiles/entity_store.dir/Store.cpp.o
+/usr/bin/ranlib ../lib/libentity_store.a
