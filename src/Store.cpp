@@ -3,9 +3,9 @@
 
 void Store::insert(std::int64_t id, const TodoProperties& properties)
 {
-    const auto title{std::any_cast<std::string>(properties.at("title"))};
-    const auto description{std::any_cast<std::string>(properties.at("description"))};
-    const auto timestamp{std::any_cast<double>(properties.at("timestamp"))};
+    const auto title{std::get<std::string>(properties.at("title"))};
+    const auto description{std::get<std::string>(properties.at("description"))};
+    const auto timestamp{std::get<double>(properties.at("timestamp"))};
     todos[id]=Todo{id, title, description, timestamp};
 }
 
@@ -15,13 +15,13 @@ void Store::update(std::int64_t id, const TodoProperties &properties)
     {
         if(property.first == "title")
         {
-            todos[id].title = std::any_cast<std::string>(property.second);
+            todos[id].title = std::get<std::string>(property.second);
         }else if(property.first == "description")
         {
-            todos[id].description = std::any_cast<std::string>(property.second);
+            todos[id].description = std::get<std::string>(property.second);
         }else if(property.first == "timestamp")
         {
-            todos[id].timestamp = std::any_cast<double>(property.second);
+            todos[id].timestamp = std::get<double>(property.second);
         }else{
             throw std::invalid_argument("Unknown property: "+property.first);
         }
@@ -56,13 +56,13 @@ std::vector<std::int64_t> Store::query(const TodoProperty& property) const
         auto matches{false};
         if(property.first == "title")
         {
-            matches = todo.second.title == std::any_cast<std::string>(property.second);
+            matches = todo.second.title == std::get<std::string>(property.second);
         }else if(property.first == "description")
         {
-            matches = todo.second.description == std::any_cast<std::string>(property.second);
+            matches = todo.second.description == std::get<std::string>(property.second);
         }else if(property.first == "timestamp")
         {
-            matches = todo.second.timestamp == std::any_cast<double>(property.second);
+            matches = todo.second.timestamp == std::get<double>(property.second);
         }
         if(matches)
         {

@@ -4,12 +4,12 @@ using namespace std::string_literals;
 
 bool compareTodoProperties(const TodoProperties& lhs, const TodoProperties& rhs)
 {
-    const auto sameTitle{std::any_cast<std::string>(lhs.at("title")) ==
-                         std::any_cast<std::string>(rhs.at("title"))};
-    const auto sameDescription{std::any_cast<std::string>(lhs.at("description")) ==
-                               std::any_cast<std::string>(rhs.at("description"))};
-    const auto sameTimestamp{std::any_cast<double>(lhs.at("timestamp")) ==
-                             std::any_cast<double>(rhs.at("timestamp"))};
+    const auto sameTitle{std::get<std::string>(lhs.at("title")) ==
+                         std::get<std::string>(rhs.at("title"))};
+    const auto sameDescription{std::get<std::string>(lhs.at("description")) ==
+                               std::get<std::string>(rhs.at("description"))};
+    const auto sameTimestamp{std::get<double>(lhs.at("timestamp")) ==
+                             std::get<double>(rhs.at("timestamp"))};
     return sameTitle && sameDescription && sameTimestamp;
 }
 

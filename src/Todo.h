@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
-#include <any>
+#include <variant>
 #include <unordered_map>
 
-using TodoProperty = std::pair<std::string, std::any>;
-using TodoProperties = std::unordered_map<std::string, std::any>;
+using TodoProperty = std::pair<std::string, std::variant<std::string, double>>;
+using TodoProperties = std::unordered_map<std::string, std::variant<std::string, double>>;
 
 struct Todo
 {
