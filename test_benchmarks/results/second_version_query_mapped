@@ -1,0 +1,58 @@
+/home/ialvarez/Code/entity-store/cmake-build-release/bin/test_entity_store_benchmarks
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test_entity_store_benchmarks is a Catch v2.11.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Basic store
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:7
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+inserting                                                 100           179     1.9332 ms 
+                                                       464 ns        104 ns      2.252 us 
+                                                      3.56 us         19 ns      7.799 us 
+                                                                                          
+updating                                                  100           390      1.911 ms 
+                                                        49 ns         49 ns         49 ns 
+                                                         0 ns          0 ns          0 ns 
+                                                                                          
+retrieving properties                                     100           112     1.9488 ms 
+                                                       192 ns        182 ns        207 ns 
+                                                        61 ns         43 ns         81 ns 
+                                                                                          
+removing                                                  100          3093     1.8558 ms 
+                                                         6 ns          6 ns          6 ns 
+                                                         0 ns          0 ns          1 ns 
+                                                                                          
+
+-------------------------------------------------------------------------------
+Store queries
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:53
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+querying                                                  100             1    56.3977 ms 
+                                                   499.403 us    448.827 us    628.135 us 
+                                                   375.619 us     88.407 us      698.2 us 
+                                                                                          
+querying                                                  100             1    892.442 ms 
+                                                   8.74792 ms     8.4967 ms    9.25168 ms 
+                                                   1.73732 ms     1.0024 ms    2.71655 ms 
+                                                                                          
+
+===============================================================================
+test cases: 2 | 2 passed
+assertions: - none -
+
+
+Process finished with exit code 0

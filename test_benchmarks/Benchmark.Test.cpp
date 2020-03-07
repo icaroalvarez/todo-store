@@ -1,16 +1,31 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 #include <Store.h>
+#include <ParentStore.h>
 
 using namespace std::string_literals;
 
+ParentStore createDummyStore()
+{
+    constexpr auto totalTodos{1000*1000};
+    auto timestampInitialValue{0.0};
+    ParentStore store;
+    for(int i=0; i < totalTodos; i++)
+    {
+        store.insert(i, {{"title", "Buy Milk"s},
+                         {"description", "make of almonds!"s},
+                         {"timestamp", timestampInitialValue++}});
+    }
+    return store;
+}
+
 TEST_CASE("Basic store")
 {
-    constexpr auto id{2133};
+    constexpr auto id{1000*1000};
     const TodoProperties properties{{"title", "Buy Milk"s},
                                     {"description", "make of almonds!"s},
                                     {"timestamp", 2392348.12233}};
-    Store store;
+    ParentStore store{createDummyStore()};
 
     BENCHMARK("inserting")
                 {
@@ -36,24 +51,12 @@ TEST_CASE("Basic store")
                 };
 }
 
-Store createDummyStore()
-{
-    const TodoProperties properties{{"title", "Buy Milk"s},
-                                    {"description", "make of almonds!"s},
-                                    {"timestamp", 2392348.12233}};
-    constexpr auto totalTodos{1000*1000};
-    Store store;
-    for(int i=0; i < totalTodos; i++)
-    {
-        store.insert(i, properties);
-    }
-    return store;
-}
+
 
 TEST_CASE("Store queries")
 {
-    Store store{createDummyStore()};
-    
+    ParentStore store{createDummyStore()};
+
     const TodoProperty queryProperty{"title", "Buy Milk"s};
     BENCHMARK("querying")
                 {
@@ -62,8 +65,31 @@ TEST_CASE("Store queries")
 
     constexpr auto minTimeStamp{1000.0};
     constexpr auto maxTimeStamp{1300.0};
-    BENCHMARK("querying")
+    BENCHMARK("range querying")
                 {
                     return store.rangeQuery(minTimeStamp, maxTimeStamp);
+                };
+}
+
+TEST_CASE("Child stores")
+{
+    ParentStore parentStore{createDummyStore()};
+    auto parent{std::make_shared<ParentStore>(parentStore)};
+    auto child{parent->createChild()};
+
+    BENCHMARK("creating child")
+                {
+                    return parent->createChild();
+                };
+
+    constexpr auto id{2133};
+    const TodoProperties propertiesAfterUpdate{{"title", "Buy Milk"s},
+                                               {"description", "make of almonds!"s},
+                                               {"timestamp", 2392348.12233}};
+    child->update(id, {{"title", "Buy Milk"s}});
+
+    BENCHMARK("child committing")
+                {
+                    return child->commit();
                 };
 }

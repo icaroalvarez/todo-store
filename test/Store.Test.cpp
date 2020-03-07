@@ -1,5 +1,7 @@
 #include <catch2/catch.hpp>
 #include <Store.h>
+#include <ParentStore.h>
+
 using namespace std::string_literals;
 
 bool compareTodoProperties(const TodoProperties& lhs, const TodoProperties& rhs)
@@ -20,7 +22,7 @@ TEST_CASE("Basic store")
                                     {"description", "make of almonds!"s},
                                     {"timestamp", 2392348.12233}};
 
-    Store store;
+    ParentStore store;
     store.insert(id, properties);
 
     auto retrievedProperties{store.get(id)};
@@ -38,9 +40,9 @@ TEST_CASE("Basic store")
     REQUIRE_FALSE(idExitsInStore);
 };
 
-Store createDummyStore()
+ParentStore createDummyStore()
 {
-    Store store;
+    ParentStore store;
     auto id{0};
     store.insert(id++, {{"title", "Buy Milk"s},
                         {"description", "make of almonds!"s},
@@ -51,7 +53,7 @@ Store createDummyStore()
     store.insert(id++, {{"title", "Study Chinese"s},
                         {"description", "worth it!"s},
                         {"timestamp", 1000.0}});
-    store.insert(id++, {{"title", "Call mom"s},
+    store.insert(id, {{"title", "Call mom"s},
                         {"description", "is her birthday"s},
                         {"timestamp", 1200.0}});
     return store;
@@ -59,7 +61,7 @@ Store createDummyStore()
 
 TEST_CASE("Store queries")
 {
-    Store store{createDummyStore()};
+    ParentStore store{createDummyStore()};
 
     const TodoProperty queryProperty{"title", "Buy Milk"s};
     auto setIds{store.query(queryProperty)};
@@ -77,25 +79,25 @@ TEST_CASE("Child stores")
     const TodoProperties properties{{"title", "Buy Milk"s},
                                     {"description", "make of almonds!"s},
                                     {"timestamp", 2392348.12233}};
-    Store store;
-    store.insert(id, properties);
+    auto store{std::make_shared<ParentStore>()};
+    store->insert(id, properties);
 
-    Store child{store.createChild()};
+    auto child{store->createChild()};
 
-    auto retrievedProperties{child.get(id)};
+    auto retrievedProperties{child->get(id)};
     REQUIRE(compareTodoProperties(retrievedProperties, properties));
 
-    const TodoProperties propertiesAfterUpdate{{"title", "Buy Milk"s},
+    const TodoProperties propertiesAfterUpdate{{"title", "Buy Cream"s},
                                                {"description", "make of almonds!"s},
                                                {"timestamp", 2392348.12233}};
-    child.update(id, {{"title", "Buy Milk"s}});
-    retrievedProperties = child.get(id);
+    child->update(id, {{"title", "Buy Cream"s}});
+    retrievedProperties = child->get(id);
     REQUIRE(compareTodoProperties(retrievedProperties, propertiesAfterUpdate));
 
-    retrievedProperties = store.get(id);
+    retrievedProperties = store->get(id);
     REQUIRE(compareTodoProperties(retrievedProperties, properties));
 
-    child.commit();
-    retrievedProperties = store.get(id);
+    child->commit();
+    retrievedProperties = store->get(id);
     REQUIRE(compareTodoProperties(retrievedProperties, propertiesAfterUpdate));
 }

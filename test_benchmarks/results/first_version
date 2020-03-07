@@ -1,0 +1,35 @@
+-------------------------------------------------------------------------------
+inserting                                                 100           205     1.9065 ms 
+                                                        95 ns         91 ns        103 ns 
+                                                        27 ns         16 ns         44 ns 
+                                                                                          
+updating                                                  100           283     1.8961 ms 
+                                                        66 ns         64 ns         68 ns 
+                                                         8 ns          1 ns         14 ns 
+                                                                                          
+retrieving properties                                     100            85     1.9295 ms 
+                                                       215 ns        215 ns        217 ns 
+                                                         4 ns          0 ns          9 ns 
+                                                                                          
+removing                                                  100          3129     1.8774 ms 
+                                                         5 ns          5 ns          6 ns 
+                                                         0 ns          0 ns          1 ns 
+                                                                                          
+
+-------------------------------------------------------------------------------
+Store queries
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:53
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+querying                                                  100             1     1.34885 s 
+                                                   13.8621 ms    13.6571 ms    14.1899 ms 
+                                                   1.30294 ms    914.555 us    1.84306 ms 
+                                                                                          
+querying                                                  100             1    942.491 ms 
+                                                   8.28373 ms    8.18967 ms    8.64259 ms 
+                                                   834.807 us    182.041 us     1.9457 ms 
