@@ -66,15 +66,7 @@ std::vector<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, double ma
     std::vector<std::int64_t> ids;
 
     const auto startIterator{timestampIds.lower_bound(minTimeStamp)};
-    if(startIterator == timestampIds.begin())
-    {
-        return ids;
-    }
     const auto endIterator{timestampIds.upper_bound(maxTimeStamp)};
-    if(endIterator == timestampIds.end())
-    {
-        return ids;
-    }
 
     for(auto it=startIterator; it != endIterator; std::advance(it, 1))
     {

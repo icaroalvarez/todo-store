@@ -26,6 +26,8 @@ private:
     std::unordered_map<std::int64_t, TodoProperties> propertiesToBeUpdated;
     std::set<std::int64_t> idsToBeRemoved;
     std::weak_ptr<Store> parent;
+    std::unordered_map<std::string, std::vector<std::int64_t>> titleIds;
+    std::map<double, std::vector<std::int64_t>> timestampIds;
 };
 
 

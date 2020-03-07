@@ -73,8 +73,7 @@ TEST_CASE("Store queries")
 
 TEST_CASE("Child stores")
 {
-    ParentStore parentStore{createDummyStore()};
-    auto parent{std::make_shared<ParentStore>(parentStore)};
+    auto parent{std::make_shared<ParentStore>(createDummyStore())};
     auto child{parent->createChild()};
 
     BENCHMARK("creating child")
