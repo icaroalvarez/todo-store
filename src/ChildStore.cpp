@@ -11,10 +11,10 @@ void ChildStore::insert(std::int64_t id, const TodoProperties& properties)
     todosToBeInserted[id]=properties;
 
     const auto title{std::get<std::string>(properties.at("title"))};
-    titleIds[title].push_back(id);
+    titleIds[title].insert(id);
 
     const auto timestamp{std::get<double>(properties.at("timestamp"))};
-    timestampIds[timestamp].push_back(id);
+    timestampIds[timestamp].insert(id);
 }
 
 void ChildStore::update(std::int64_t id, const TodoProperties &properties)
@@ -71,12 +71,12 @@ bool ChildStore::checkId(std::int64_t id)
     return (existInParent or existInToBeInserted) and not existInToBeRemoved;
 }
 
-std::vector<std::int64_t> ChildStore::query(const TodoProperty& property) const
+std::unordered_set<std::int64_t> ChildStore::query(const TodoProperty& property) const
 {
-    std::vector<std::int64_t> ids;
+    std::unordered_set<std::int64_t> ids;
     if(auto parentSharedPtr{parent.lock()})
     {
-        ids = parentSharedPtr->query(property);
+        ids = std::move(parentSharedPtr->query(property));
     }
 
     if(property.first == "title")
@@ -84,20 +84,19 @@ std::vector<std::int64_t> ChildStore::query(const TodoProperty& property) const
         const auto& title{std::get<std::string>(property.second)};
         if(titleIds.find(title) not_eq titleIds.end())
         {
-            auto temp{titleIds.at(title)};
-            ids.insert(ids.cend(), temp.cbegin(), temp.cend());
+            auto tempIds{titleIds.at(title)};
+            ids.merge(std::move(tempIds));
         }
     }
-
     return ids;
 }
 
-std::vector<std::int64_t> ChildStore::rangeQuery(double minTimeStamp, double maxTimeStamp) const
+std::unordered_set<std::int64_t> ChildStore::rangeQuery(double minTimeStamp, double maxTimeStamp) const
 {
-    std::vector<std::int64_t> ids;
+    std::unordered_set<std::int64_t> ids;
     if(auto parentSharedPtr{parent.lock()})
     {
-        ids = parentSharedPtr->rangeQuery(minTimeStamp, maxTimeStamp);
+        ids = std::move(parentSharedPtr->rangeQuery(minTimeStamp, maxTimeStamp));
     }
 
     const auto startIterator{timestampIds.lower_bound(minTimeStamp)};
@@ -105,7 +104,8 @@ std::vector<std::int64_t> ChildStore::rangeQuery(double minTimeStamp, double max
 
     for(auto it=startIterator; it != endIterator; std::advance(it, 1))
     {
-        ids.insert(ids.cend(), it->second.cbegin(), it->second.cend());
+        auto tempIds{it->second};
+        ids.merge(std::move(tempIds));
     }
 
     return ids;

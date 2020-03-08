@@ -8,8 +8,8 @@ void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
     const auto description{std::get<std::string>(properties.at("description"))};
     const auto timestamp{std::get<double>(properties.at("timestamp"))};
     todos[id]=Todo{id, title, description, timestamp};
-    titleIds[title].push_back(id);
-    timestampIds[timestamp].push_back(id);
+    titleIds[title].insert(id);
+    timestampIds[timestamp].insert(id);
 }
 
 void ParentStore::update(std::int64_t id, const TodoProperties &properties)
@@ -18,13 +18,21 @@ void ParentStore::update(std::int64_t id, const TodoProperties &properties)
     {
         if(property.first == "title")
         {
-            todos[id].title = std::get<std::string>(property.second);
+            const auto& newTitle{std::get<std::string>(property.second)};
+            const auto oldTitle{std::move(todos[id].title)};
+            todos[id].title = newTitle;
+            titleIds.at(oldTitle).erase(id);
+            titleIds[newTitle].insert(id);
         }else if(property.first == "description")
         {
             todos[id].description = std::get<std::string>(property.second);
         }else if(property.first == "timestamp")
         {
-            todos[id].timestamp = std::get<double>(property.second);
+            const auto& timestamp{std::get<double>(property.second)};
+            const auto oldTimestamp{todos[id].timestamp};
+            todos[id].timestamp = timestamp;
+            timestampIds.at(oldTimestamp).erase(id);
+            timestampIds[timestamp].insert(id);
         }else{
             throw std::invalid_argument("Unknown property: "+property.first);
         }
@@ -43,6 +51,24 @@ TodoProperties ParentStore::get(std::int64_t id) const
 
 void ParentStore::remove(std::int64_t id)
 {
+    const auto& todoTitle{todos[id].title};
+    auto& tempTitleIds{titleIds[todoTitle]};
+    if(tempTitleIds.size() > 1)
+    {
+        tempTitleIds.erase(id);
+    }else{
+        titleIds.erase(todoTitle);
+    }
+
+    const auto& todoTimestamp{todos[id].timestamp};
+    auto& tempTimestampIds{timestampIds[todoTimestamp]};
+    if(tempTimestampIds.size() > 1)
+    {
+        tempTimestampIds.erase(id);
+    }else{
+        timestampIds.erase(todoTimestamp);
+    }
+
     todos.erase(id);
 }
 
@@ -51,9 +77,9 @@ bool ParentStore::checkId(std::int64_t id)
     return todos.find(id) not_eq todos.end();
 }
 
-std::vector<std::int64_t> ParentStore::query(const TodoProperty& property) const
+std::unordered_set<std::int64_t> ParentStore::query(const TodoProperty& property) const
 {
-    std::vector<std::int64_t> ids;
+    std::unordered_set<std::int64_t> ids;
     if(property.first == "title")
     {
         ids = titleIds.at(std::get<std::string>(property.second));
@@ -61,16 +87,17 @@ std::vector<std::int64_t> ParentStore::query(const TodoProperty& property) const
     return ids;
 }
 
-std::vector<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, double maxTimeStamp) const
+std::unordered_set<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, double maxTimeStamp) const
 {
-    std::vector<std::int64_t> ids;
+    std::unordered_set<std::int64_t> ids;
 
     const auto startIterator{timestampIds.lower_bound(minTimeStamp)};
     const auto endIterator{timestampIds.upper_bound(maxTimeStamp)};
 
     for(auto it=startIterator; it != endIterator; std::advance(it, 1))
     {
-        ids.insert(ids.cend(), it->second.cbegin(), it->second.cend());
+        auto tempIds{it->second};
+        ids.merge(std::move(tempIds));
     }
     return ids;
 }

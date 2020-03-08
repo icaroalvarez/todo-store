@@ -63,16 +63,50 @@ TEST_CASE("Store queries")
 {
     ParentStore store{createDummyStore()};
 
-    const TodoProperty queryProperty{"title", "Buy Milk"s};
-    auto setIds{store.query(queryProperty)};
-    std::vector<std::int64_t> expectedIds{0, 1};
-    REQUIRE(std::is_permutation(setIds.cbegin(), setIds.cend(), expectedIds.cbegin()));
+    TodoProperty queryProperty{"title", "Buy Milk"s};
+    auto ids{store.query(queryProperty)};
+    std::unordered_set<std::int64_t> expectedIds{0, 1};
+    REQUIRE(std::is_permutation(expectedIds.cbegin(), expectedIds.cend(), ids.cbegin()));
 
-    constexpr auto minTimeStamp{1000.0};
-    constexpr auto maxTimeStamp{1300.0};
+    auto idToUpdate{1};
+    TodoProperties propertiesToUpdate{{"title", "Buy Cereals"s}};
+    store.update(idToUpdate, propertiesToUpdate);
+
+    ids = store.query(queryProperty);
+    expectedIds = {0};
+    REQUIRE(ids == expectedIds);
+
+    queryProperty = {"title", "Buy Cereals"s};
+    ids = store.query(queryProperty);
+    expectedIds = {1};
+    REQUIRE(ids == expectedIds);
+
+    auto minTimeStamp{1000.0};
+    auto maxTimeStamp{1300.0};
     expectedIds = {2, 3};
-    setIds = store.rangeQuery(minTimeStamp, maxTimeStamp);
-    REQUIRE(std::is_permutation(expectedIds.cbegin(), expectedIds.cend(), setIds.cbegin()));
+    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+    REQUIRE(std::is_permutation(expectedIds.cbegin(), expectedIds.cend(), ids.cbegin()));
+
+    idToUpdate = 3;
+    propertiesToUpdate = {{"timestamp", 1800}};
+    store.update(idToUpdate, propertiesToUpdate);
+    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+    expectedIds = {2};
+    REQUIRE(ids == expectedIds);
+
+    store.remove(2);
+    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+    REQUIRE(ids.empty());
+
+    minTimeStamp = 1500;
+    maxTimeStamp = 2000;
+    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+    expectedIds = {3};
+    REQUIRE(ids == expectedIds);
+
+    store.remove(3);
+    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+    REQUIRE(ids.empty());
 }
 
 TEST_CASE("Child stores")
