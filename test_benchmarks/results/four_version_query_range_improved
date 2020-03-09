@@ -1,0 +1,96 @@
+/home/ialvarez/Code/entity-store/cmake-build-release/bin/test_entity_store_benchmarks
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test_entity_store_benchmarks is a Catch v2.11.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Basic store
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:23
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+inserting                                                 100            64     1.9072 ms 
+                                                       280 ns        276 ns        291 ns 
+                                                        33 ns         14 ns         57 ns 
+                                                                                          
+updating                                                  100            34     1.8904 ms 
+                                                       535 ns        524 ns        557 ns 
+                                                        75 ns         44 ns        118 ns 
+                                                                                          
+retrieving properties                                     100           123     1.8819 ms 
+                                                       154 ns        154 ns        155 ns 
+                                                         3 ns          0 ns          6 ns 
+                                                                                          
+removing                                                  100           137     1.8906 ms 
+                                                       137 ns        134 ns        143 ns 
+                                                        20 ns         11 ns         30 ns 
+                                                                                          
+
+-------------------------------------------------------------------------------
+Query small store
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:55
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+querying small store                                      100           330      1.881 ms 
+                                                        48 ns         48 ns         49 ns 
+                                                         2 ns          0 ns          4 ns 
+                                                                                          
+range querying small store                                100          2744     1.6464 ms 
+                                                         6 ns          6 ns          7 ns 
+                                                         0 ns          0 ns          0 ns 
+                                                                                          
+
+-------------------------------------------------------------------------------
+Query big store
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:80
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+querying                                                  100             1     5.25025 s 
+                                                   48.6152 ms    48.2839 ms     49.101 ms 
+                                                   2.02166 ms    1.53242 ms    2.82164 ms 
+                                                                                          
+range querying                                            100             1      8.3883 s 
+                                                   83.7855 ms    83.5521 ms    84.1134 ms 
+                                                   1.40066 ms    1.09369 ms    2.14264 ms 
+                                                                                          
+
+-------------------------------------------------------------------------------
+Child stores
+-------------------------------------------------------------------------------
+/home/ialvarez/Code/entity-store/test_benchmarks/Benchmark.Test.cpp:97
+...............................................................................
+
+benchmark name                                  samples       iterations    estimated
+                                                mean          low mean      high mean
+                                                std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+creating child                                            100           145      1.885 ms 
+                                                       126 ns        123 ns        131 ns 
+                                                        17 ns          8 ns         30 ns 
+                                                                                          
+child committing                                          100           208     1.8928 ms 
+                                                        87 ns         86 ns         90 ns 
+                                                         9 ns          0 ns         17 ns 
+                                                                                          
+
+===============================================================================
+test cases: 4 | 4 passed
+assertions: - none -
+
+
+Process finished with exit code 0

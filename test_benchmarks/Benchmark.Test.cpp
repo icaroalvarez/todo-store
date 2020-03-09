@@ -5,9 +5,10 @@
 
 using namespace std::string_literals;
 
+constexpr auto totalTodos{1000*1000};
+
 ParentStore createDummyStore()
 {
-    constexpr auto totalTodos{1000*1000};
     auto timestampInitialValue{0.0};
     ParentStore store;
     for(int i=0; i < totalTodos; i++)
@@ -51,9 +52,32 @@ TEST_CASE("Basic store")
                 };
 }
 
+TEST_CASE("Query small store")
+{
+    constexpr auto id{2133};
+    const TodoProperties properties{{"title", "Buy Milk"s},
+                                    {"description", "make of almonds!"s},
+                                    {"timestamp", 2392348.12233}};
 
+    ParentStore store;
+    store.insert(id, properties);
 
-TEST_CASE("Store queries")
+    const TodoProperty queryProperty{"title", "Buy Milk"s};
+    BENCHMARK("querying small store")
+                {
+                    return store.query(queryProperty);
+                };
+
+    constexpr auto minTimeStamp{1000.0};
+    constexpr auto maxTimeStamp{1300.0};
+    BENCHMARK("range querying small store")
+                {
+                    return store.rangeQuery(minTimeStamp, maxTimeStamp);
+                };
+
+}
+
+TEST_CASE("Query big store")
 {
     ParentStore store{createDummyStore()};
 
@@ -63,11 +87,10 @@ TEST_CASE("Store queries")
                     return store.query(queryProperty);
                 };
 
-    constexpr auto minTimeStamp{1000.0};
-    constexpr auto maxTimeStamp{1300.0};
+    constexpr auto minTimeStamp{0.0};
     BENCHMARK("range querying")
                 {
-                    return store.rangeQuery(minTimeStamp, maxTimeStamp);
+                    return store.rangeQuery(minTimeStamp, totalTodos);
                 };
 }
 
@@ -81,7 +104,7 @@ TEST_CASE("Child stores")
                     return parent->createChild();
                 };
 
-    constexpr auto id{2133};
+    constexpr auto id{133};
     const TodoProperties propertiesAfterUpdate{{"title", "Buy Milk"s},
                                                {"description", "make of almonds!"s},
                                                {"timestamp", 2392348.12233}};
