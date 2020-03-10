@@ -290,4 +290,70 @@ namespace
             }
         }
     }
+
+    SCENARIO("Multiple children")
+    {
+        GIVEN("A parent store with some todos inserted and two children")
+        {
+            auto store{std::make_shared<ParentStore>(createDummyStore())};
+            auto firstChild{store->createChild()};
+            auto secondChild{store->createChild()};
+
+            WHEN("A todo is inserted in first child")
+            {
+                constexpr auto id{123};
+                const TodoProperties properties{{"title",       "Buy Milk"s},
+                                                {"description", "make of almonds!"s},
+                                                {"timestamp",   1150.12233}};
+                firstChild->insert(id, properties);
+
+                AND_WHEN("The first child is committed")
+                {
+                    firstChild->commit();
+
+                    THEN("The todo is present in both the parent and the second child")
+                    {
+                        REQUIRE(store->checkId(id));
+                        REQUIRE(secondChild->checkId(id));
+                    }
+                }
+            }
+
+            WHEN("The first and the second child update same todo")
+            {
+                constexpr auto id{0};
+                const TodoProperties propertiesFirstChild{{"title",       "Buy Cereals"s},
+                                                          {"description", "yummy!"s},
+                                                          {"timestamp",   1150.12233}};
+                firstChild->update(id, propertiesFirstChild);
+
+                const TodoProperties propertiesSecondChild{{"title",       "Buy Coke"s},
+                                                           {"description", "sugar!"s},
+                                                           {"timestamp",   1150.12233}};
+                secondChild->update(id, propertiesSecondChild);
+
+                AND_WHEN("First child is committed")
+                {
+                    firstChild->commit();
+
+                    THEN("The second child properties match the ones update by the second child")
+                    {
+                        const auto& retrievedProperties{secondChild->get(id)};
+                        REQUIRE(compareTodoProperties(retrievedProperties, propertiesSecondChild));
+                    }
+
+                    AND_WHEN("Second child is committed")
+                    {
+                        secondChild->commit();
+
+                        THEN("Parent properties match the ones updated by the second child")
+                        {
+                            const auto& retrievedProperties{store->get(id)};
+                            REQUIRE(compareTodoProperties(retrievedProperties, propertiesSecondChild));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

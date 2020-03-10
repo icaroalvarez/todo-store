@@ -5,7 +5,7 @@
 
 using namespace std::string_literals;
 
-constexpr auto totalTodos{1000*1000};
+constexpr auto totalTodos{1000};
 
 ParentStore createDummyStore()
 {
@@ -22,7 +22,7 @@ ParentStore createDummyStore()
 
 TEST_CASE("Basic store")
 {
-    constexpr auto id{1000*1000};
+    constexpr auto id{totalTodos};
     const TodoProperties properties{{"title", "Buy Milk"s},
                                     {"description", "make of almonds!"s},
                                     {"timestamp", 2392348.12233}};

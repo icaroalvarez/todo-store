@@ -34,7 +34,6 @@ private:
      * to create the output set when calling rangeQuery.
      */
     std::multimap<double, std::int64_t> timestampIds;
-    std::weak_ptr<Store> parent;
     std::list<std::shared_ptr<Store>> children;
 };
 

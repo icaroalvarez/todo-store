@@ -31,7 +31,6 @@ private:
 
     std::multimap<double, std::int64_t> oldTimestampIdsToBeUpdated;
     std::multimap<double, std::int64_t> timestampIds;
-
 };
 
 
