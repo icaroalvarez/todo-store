@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 set(test_source_files
         main.test.cpp
-        Store.Test.cpp
+        ChildStore.Test.cpp
+        ParentStore.Test.cpp
         )
 
 add_executable(test_entity_store

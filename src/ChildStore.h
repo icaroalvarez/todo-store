@@ -18,16 +18,20 @@ public:
     bool checkId(std::int64_t id) override;
     std::unordered_set<std::int64_t> query(const TodoProperty& property) const override;
     std::unordered_set<std::int64_t> rangeQuery(double minTimeStamp, double maxTimeStamp) const override;
-
-    std::shared_ptr<Store> createChild();
-    void commit();
+    std::shared_ptr<Store> createChild() override;
+    void commit() override;
 private:
     std::unordered_map<std::int64_t, TodoProperties> todosToBeInserted;
     std::unordered_map<std::int64_t, TodoProperties> propertiesToBeUpdated;
     std::set<std::int64_t> idsToBeRemoved;
     std::weak_ptr<Store> parent;
     std::unordered_map<std::string, std::unordered_set<std::int64_t>> titleIds;
-    std::map<double, std::unordered_set<std::int64_t>> timestampIds;
+    std::unordered_map<std::string, std::unordered_set<std::int64_t>> oldTitleIdsToBeUpdated;
+    std::unordered_map<std::string, std::unordered_set<std::int64_t>> newTitleIdsToBeUpdated;
+
+    std::multimap<double, std::int64_t> oldTimestampIdsToBeUpdated;
+    std::multimap<double, std::int64_t> timestampIds;
+
 };
 
 
