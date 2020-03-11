@@ -5,6 +5,7 @@ set(test_source_files
         ChildStore.Test.cpp
         ParentStore.Test.cpp
         StringPropertyIds.Test.cpp
+        DoublePropertyIds.Test.cpp
         )
 
 add_executable(test_entity_store

@@ -9,63 +9,35 @@ void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
     const auto& timestamp{std::get<double>(properties.at("timestamp"))};
     todos[id]=Todo{id, title, description, timestamp};
 
-    // let's keep the id in a associative container with the title as key in order to improve
-    // the performance of future queries
+    /**
+     * lets keep a track of the ids related to title and timestamp in order to improve queries performance
+     */
     titleIds.insert(title, id);
-
-    // let's keep the id in a associative container with the timestamp as key in order to improve
-    // the performance of future queries
-    timestampIds.insert({timestamp, id});
-}
-
-/**
- * This is just a helper function ir order to remove the id from the timestampIds associative container.
- * @param timestamp key of the id we want to remove
- * @param id the id to be removed
- * @param timestampIds the associative container
- */
-void removeTimestampId(double timestamp, std::int64_t id, std::multimap<double, std::int64_t>& timestampIds)
-{
-    const auto& iterPair{timestampIds.equal_range(timestamp)};
-    for (auto it = iterPair.first; it != iterPair.second; ++it)
-    {
-        if (it->second == id)
-        {
-            timestampIds.erase(it);
-            break;
-        }
-    }
+    timestampIds.insert(timestamp, id);
 }
 
 void ParentStore::update(std::int64_t id, const TodoProperties &properties)
 {
+    /**
+     * Update also the id from titleIds and timestampIds!
+     */
     for(const auto& property : properties)
     {
         if(property.first == "title")
         {
-            /**
-             * Here we want also to update the titleIds associative container
-             * removing the id associated with the old title and inserting
-             * the id associated with the new title
-             */
             const auto& newTitle{std::get<std::string>(property.second)};
-            const auto oldTitle{std::move(todos[id].title)};
-            todos[id].title = newTitle;
+            const auto oldTitle{std::move(todos.at(id).title)};
+            todos.at(id).title = newTitle;
             titleIds.updateProperty(oldTitle, newTitle, id);
         }else if(property.first == "description")
         {
-            todos[id].description = std::get<std::string>(property.second);
+            todos.at(id).description = std::get<std::string>(property.second);
         }else if(property.first == "timestamp")
         {
-            /**
-             * Here we want also to update the timestampIds associative container
-             * removing the id associated with the old timestamp and inserting
-             * the id associated with the new timestamp
-             */
-            const auto& timestamp{std::get<double>(property.second)};
-            removeTimestampId(todos[id].timestamp, id, timestampIds);
-            todos[id].timestamp = timestamp;
-            timestampIds.insert({timestamp, id});
+            const auto& newTimestamp{std::get<double>(property.second)};
+            const auto& oldTimestamp{todos.at(id).timestamp};
+            timestampIds.updateProperty(oldTimestamp, newTimestamp, id);
+            todos.at(id).timestamp = newTimestamp;
         }else{
             throw std::invalid_argument("Unknown property: "+property.first);
         }
@@ -85,11 +57,14 @@ TodoProperties ParentStore::get(std::int64_t id) const
 void ParentStore::remove(std::int64_t id)
 {
     /**
-     * Remove also the id from the associative containers titleIds and timestamp ids.
+     * Remove also the id from titleIds and timestamp ids.
      */
-    const auto& todoTitle{todos[id].title};
-    titleIds.remove(todoTitle, id);
-    removeTimestampId(todos[id].timestamp, id, timestampIds);
+    const auto& title{todos.at(id).title};
+    titleIds.remove(title, id);
+
+    const auto& timestamp{todos.at(id).timestamp};
+    timestampIds.remove(timestamp, id);
+
     todos.erase(id);
 }
 
@@ -101,8 +76,7 @@ bool ParentStore::checkId(std::int64_t id)
 std::unordered_set<std::int64_t> ParentStore::query(const TodoProperty& property) const
 {
     /**
-     * Create a set of ids. Here we could improve the efficiency returning a const reference object
-     * since we have the container already created (titleIds), avoiding the extra time for creating a copy
+     * Only title is supported but supporting also description is very trivial.
      */
     std::unordered_set<std::int64_t> ids;
     if(property.first == "title")
@@ -115,21 +89,7 @@ std::unordered_set<std::int64_t> ParentStore::query(const TodoProperty& property
 
 std::unordered_set<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, double maxTimeStamp) const
 {
-    /**
-     * Here we need to create a new set since and we cannot return a const reference since we have
-     * not a container already created (timestampIds contains all timestamps, not just a range).
-     * What we could do is use the range view feature of C++20 (or rangesV3 libraries or boost::ranges) in
-     * order to create a view from the container filtering just the values in the range
-     */
-    const auto& startIterator{timestampIds.lower_bound(minTimeStamp)};
-    const auto& endIterator{timestampIds.upper_bound(maxTimeStamp)};
-
-    std::unordered_set<std::int64_t> ids;
-    for(auto it=startIterator; it != endIterator; std::advance(it, 1))
-    {
-        ids.emplace(it->second);
-    }
-    return ids;
+    return timestampIds.getRangeIds(minTimeStamp, maxTimeStamp);
 }
 
 std::shared_ptr<Store> ParentStore::createChild()

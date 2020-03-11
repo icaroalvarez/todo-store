@@ -6,6 +6,7 @@ set(source_files
         ParentStore
         ChildStore
         StringPropertyIds
+        DoublePropertyIds
         )
 
 add_library(entity_store

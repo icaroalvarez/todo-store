@@ -11,10 +11,10 @@ void ChildStore::insert(std::int64_t id, const TodoProperties& properties)
     todosToBeInserted[id]=properties;
 
     const auto title{std::get<std::string>(properties.at("title"))};
-    titleIds[title].insert(id);
+    titleIds.insert(title, id);
 
     const auto timestamp{std::get<double>(properties.at("timestamp"))};
-    timestampIds.insert({timestamp, id});
+    timestampIds.insert(timestamp, id);
 }
 
 void ChildStore::update(std::int64_t id, const TodoProperties &properties)
@@ -37,7 +37,7 @@ void ChildStore::update(std::int64_t id, const TodoProperties &properties)
             const auto oldTitle{std::get<std::string>(parentSharedPtr->get(id).at("title"))};
             const auto newTitle{std::get<std::string>(properties.at("title"))};
             oldTitleIdsToBeUpdated[oldTitle].insert(id);
-            newTitleIdsToBeUpdated[newTitle].insert(id);
+            titleIds.insert(newTitle, id);
         }
     }
 
@@ -48,7 +48,7 @@ void ChildStore::update(std::int64_t id, const TodoProperties &properties)
             const auto oldTimestamp{std::get<double>(parentSharedPtr->get(id).at("timestamp"))};
             oldTimestampIdsToBeUpdated.insert({oldTimestamp, id});
             const auto timestamp{std::get<double>(properties.at("timestamp"))};
-            timestampIds.insert({timestamp, id});
+            timestampIds.insert(timestamp, id);
         }
     }
 }
@@ -56,7 +56,8 @@ void ChildStore::update(std::int64_t id, const TodoProperties &properties)
 TodoProperties ChildStore::get(std::int64_t id) const
 {
     TodoProperties properties;
-    if(todosToBeInserted.find(id) not_eq todosToBeInserted.end())
+    const auto idWillBeInserted{todosToBeInserted.find(id) not_eq todosToBeInserted.end()};
+    if(idWillBeInserted)
     {
         properties = todosToBeInserted.at(id);
     }else{
@@ -65,8 +66,8 @@ TodoProperties ChildStore::get(std::int64_t id) const
         if (parentSharedPtr && not idWillBeRemoved)
         {
             properties = parentSharedPtr->get(id);
-
-            if (propertiesToBeUpdated.find(id) not_eq propertiesToBeUpdated.end())
+            const auto idWillBeUpdated{propertiesToBeUpdated.find(id) not_eq propertiesToBeUpdated.end()};
+            if (idWillBeUpdated)
             {
                 for (auto &property : propertiesToBeUpdated.at(id))
                 {
@@ -74,7 +75,6 @@ TodoProperties ChildStore::get(std::int64_t id) const
                 }
             }
         }
-
     }
     return properties;
 }
@@ -120,10 +120,10 @@ std::unordered_set<std::int64_t> ChildStore::query(const TodoProperty& property)
     if(property.first == "title")
     {
         const auto& title{std::get<std::string>(property.second)};
-        if(titleIds.find(title) not_eq titleIds.end())
+        auto childIds{titleIds.getIds(title)};
+        if(not childIds.empty())
         {
-            auto tempIds{titleIds.at(title)};
-            ids.merge(std::move(tempIds));
+            ids.merge(std::move(childIds));
         }
 
         if(oldTitleIdsToBeUpdated.find(title) not_eq oldTitleIdsToBeUpdated.end())
@@ -132,12 +132,6 @@ std::unordered_set<std::int64_t> ChildStore::query(const TodoProperty& property)
             {
                 ids.erase(id);
             }
-        }
-
-        if(newTitleIdsToBeUpdated.find(title) not_eq newTitleIdsToBeUpdated.end())
-        {
-            auto updatedIds = newTitleIdsToBeUpdated.at(title);
-            ids.merge(updatedIds);
         }
     }
     return ids;
@@ -166,12 +160,8 @@ std::unordered_set<std::int64_t> ChildStore::rangeQuery(double minTimeStamp, dou
     }
 
     // add the new ids inserted and the ones updated in the child
-    startIterator = timestampIds.lower_bound(minTimeStamp);
-    endIterator = timestampIds.upper_bound(maxTimeStamp);
-    for(auto it=startIterator; it != endIterator; std::advance(it, 1))
-    {
-        ids.emplace(it->second);
-    }
+    const auto& childIds{timestampIds.getRangeIds(minTimeStamp, maxTimeStamp)};
+    ids.insert(childIds.begin(), childIds.end());
 
     return ids;
 }

@@ -6,6 +6,8 @@
 #include <memory>
 #include <set>
 #include "Store.h"
+#include "StringPropertyIds.h"
+#include "DoublePropertyIds.h"
 
 class ChildStore: public Store
 {
@@ -25,12 +27,11 @@ private:
     std::unordered_map<std::int64_t, TodoProperties> propertiesToBeUpdated;
     std::set<std::int64_t> idsToBeRemoved;
     std::weak_ptr<Store> parent;
-    std::unordered_map<std::string, std::unordered_set<std::int64_t>> titleIds;
+    StringPropertyIds titleIds;
     std::unordered_map<std::string, std::unordered_set<std::int64_t>> oldTitleIdsToBeUpdated;
-    std::unordered_map<std::string, std::unordered_set<std::int64_t>> newTitleIdsToBeUpdated;
 
     std::multimap<double, std::int64_t> oldTimestampIdsToBeUpdated;
-    std::multimap<double, std::int64_t> timestampIds;
+    DoublePropertyIds timestampIds;
 };
 
 
