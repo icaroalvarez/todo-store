@@ -11,7 +11,7 @@ void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
 
     // let's keep the id in a associative container with the title as key in order to improve
     // the performance of future queries
-    titleIds[title].insert(id);
+    titleIds.insert(title, id);
 
     // let's keep the id in a associative container with the timestamp as key in order to improve
     // the performance of future queries
@@ -51,8 +51,7 @@ void ParentStore::update(std::int64_t id, const TodoProperties &properties)
             const auto& newTitle{std::get<std::string>(property.second)};
             const auto oldTitle{std::move(todos[id].title)};
             todos[id].title = newTitle;
-            titleIds.at(oldTitle).erase(id);
-            titleIds[newTitle].insert(id);
+            titleIds.updateProperty(oldTitle, newTitle, id);
         }else if(property.first == "description")
         {
             todos[id].description = std::get<std::string>(property.second);
@@ -89,13 +88,7 @@ void ParentStore::remove(std::int64_t id)
      * Remove also the id from the associative containers titleIds and timestamp ids.
      */
     const auto& todoTitle{todos[id].title};
-    auto& tempTitleIds{titleIds[todoTitle]};
-    if(tempTitleIds.size() > 1)
-    {
-        tempTitleIds.erase(id);
-    }else{
-        titleIds.erase(todoTitle);
-    }
+    titleIds.remove(todoTitle, id);
     removeTimestampId(todos[id].timestamp, id, timestampIds);
     todos.erase(id);
 }
@@ -115,10 +108,7 @@ std::unordered_set<std::int64_t> ParentStore::query(const TodoProperty& property
     if(property.first == "title")
     {
         const auto& title{std::get<std::string>(property.second)};
-        if(titleIds.find(title) not_eq titleIds.end())
-        {
-            ids = titleIds.at(title);
-        }
+        ids = titleIds.getIds(title);
     }
     return ids;
 }

@@ -5,6 +5,7 @@
 #include <list>
 #include <memory>
 #include "Store.h"
+#include "StringPropertyIds.h"
 
 class ParentStore: public Store
 {
@@ -25,7 +26,8 @@ private:
      * to improve the query by title feature. Unordered container were chosen because it performance better
      * than the ordered ones and there is no need to keep the values ordered.
      */
-    std::unordered_map<std::string, std::unordered_set<std::int64_t>> titleIds;
+    //std::unordered_map<std::string, std::unordered_set<std::int64_t>> titleIds;
+    StringPropertyIds titleIds;
     /**
      * timestampsIds is an associative container that will keep track of all ids related to timestamps values
      * in order to improve the timestamp range query feature. A sorted container is more convenient than an

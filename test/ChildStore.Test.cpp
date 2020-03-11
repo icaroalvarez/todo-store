@@ -188,7 +188,7 @@ namespace
                     THEN("The new id is returned when querying")
                     {
                         ids = child->query(queryProperty);
-                        std::unordered_set<std::int64_t> expectedIds{0, 1, id};
+                        expectedIds = {0, 1, id};
                         REQUIRE(std::is_permutation(expectedIds.cbegin(), expectedIds.cend(), ids.cbegin()));
                     }
                 }

@@ -5,6 +5,7 @@ set(source_files
         Store.h
         ParentStore
         ChildStore
+        StringPropertyIds
         )
 
 add_library(entity_store
