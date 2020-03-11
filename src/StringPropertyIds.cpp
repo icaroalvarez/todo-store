@@ -25,11 +25,16 @@ void StringPropertyIds::updateProperty(const std::string &oldProperty,
 
 void StringPropertyIds::remove(const std::string &property, std::int64_t id)
 {
-    auto& ids{propertyIds.at(property)};
-    if(ids.size() > 1)
+    const auto propertyExists{propertyIds.find(property) not_eq propertyIds.end()};
+    if(propertyExists)
     {
-        ids.erase(id);
-    }else{
-        propertyIds.erase(property);
+        auto &ids{propertyIds.at(property)};
+        if (ids.size() > 1)
+        {
+            ids.erase(id);
+        } else
+        {
+            propertyIds.erase(property);
+        }
     }
 }

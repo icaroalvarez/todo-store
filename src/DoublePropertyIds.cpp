@@ -3,7 +3,7 @@
 
 void DoublePropertyIds::insert(double property, std::int64_t id)
 {
-    propertyIds.insert({property, id});
+    propertyIds[property].insert(id);
 }
 
 std::unordered_set<std::int64_t> DoublePropertyIds::getRangeIds(double minValue, double maxValue) const
@@ -14,7 +14,8 @@ std::unordered_set<std::int64_t> DoublePropertyIds::getRangeIds(double minValue,
     std::unordered_set<std::int64_t> ids;
     for(auto it=startIterator; it != endIterator; std::advance(it, 1))
     {
-        ids.emplace(it->second);
+        auto timeStampIds{it->second};
+        ids.merge(timeStampIds);
     }
     return ids;
 }
@@ -29,13 +30,16 @@ void DoublePropertyIds::updateProperty(double oldPropertyValue,
 
 void DoublePropertyIds::remove(double property, std::int64_t id)
 {
-    const auto& iterPair{propertyIds.equal_range(property)};
-    for (auto it = iterPair.first; it != iterPair.second; ++it)
+    const auto propertyExists{propertyIds.find(property) not_eq propertyIds.end()};
+    if(propertyExists)
     {
-        if (it->second == id)
+        auto& ids{propertyIds.at(property)};
+        if (ids.size() > 1)
         {
-            propertyIds.erase(it);
-            break;
+            ids.erase(id);
+        } else
+        {
+            propertyIds.erase(property);
         }
     }
 }

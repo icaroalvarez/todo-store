@@ -1,131 +1,48 @@
 # Entity Store Example Project
+The instruction given of the example project can be read
+[here](project_instructions.md)
+.
 
-Welcome to our sample project!
+## Building the project
 
-We would love to see how you code, and more importantly, how you think. The project is inspired by real world issues we’re facing, and we hope you’ll find it interesting.
+### Using CMake
 
-Please keep a few things in mind:
-- Keep things simple – we value your time and won’t nitpick unimportant details. We’re mainly interested in overall API design, correct memory management, algorithmic correctness, and performance considerations.
-- Complete as much of these assignments as you’re comfortable doing at a high level of quality. If you don’t have enough time, it’s better to send in a partial implementation that’s great than a “complete” implementation full of bugs.
-- Please add code comments in places where you had to make interesting decisions or design tradeoffs, or in places where you want to make your assumptions explicit.
+To compile any target in the project, you can directly use CMake. Create a build directory manually and generate the 
+Makefiles in it. 
 
-If you have any questions regarding this assignment, don’t hesitate to contact us via jobs@culturedcode.com before sending in your application.
-
-
-## Problem and Motivation
-
-Our application uses domain-specific entities like `Todo`s:
-
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
 ```
 
-  struct Todo {
-    int64_t id;
-    std::string title;
-    std::string description;
-    double timestamp;
-    // and many more in the shipping app
-  };
-
+### Running tests
+```bash
+./test/test_entity_store
 ```
 
-These need to be stored, retrieved, deleted, and queried. Your task is to implement an in-memory store component to provide this functionality.
-
-Of course, in our actual application we also need to persist and sync these entities. This is far beyond the scope of this exercise and so you shouldn’t complicate the project with these features.
-
-
-## Programming Language
-
-Ideally, the project would be written in C++, as that’s the language you’ll be using when working here. However, if you’re still new to C++, you may select another performant, manual memory managed language such as C, or Rust.
-
-You can put your code into the `main.cpp` file, compiled by `make`, or you can create a new Xcode project. Whatever you do, please make sure we can compile and run your solution. Please also show off your implemented functionality via interesting examples in the `main()` function body.
-
-
-## Assignment Part 1 – A Basic Store
-
-Implement a `Store` component which is able to take care of entities identified by a unique `int64_t id` and represented as a map of properties. Here’s an API sketch in pseudo language:
-
+### Running benchmark tests
+```bash
+./test_benchmarks/test_entity_store_benchmarks
 ```
 
-  Store store;
-
-  // Insert a new entity
-  store.insert(id = 2133, properties = { "title" => "Buy Milk", 
-                                         "description" => "made of almonds!", 
-                                         "timestamp" => 2392348.12233 })
-
-  // Update only specified properties
-  store.update(id = 2133, properties = { "title" => "Buy Chocolate" })
-
-  // Retrieve properties of an entity
-  store.get(id = 2133)
-  // returns { "title" => "Buy Chocolate",
-               "description" => "made of almonds!",
-               "timestamp" => 2392348.12233 }
-
-  // Remove an entity with given id
-  store.remove(id = 2133)
-
-```
-
-Make sure your implementation correctly and efficiently handles multiple consecutive inserts, updates, and removals.
-
-
-## Assignment Part 2 – Queries
-
-To make our `Store` more useful, we’re going to support two simple kinds of queries:
-
-```
-
-  store.query("title" => "Buy Milk")
-  // returns a set of ids where the value of the "title" property is equal to "Buy Milk"
-
-  store.range_query("timestamp" => (1000, 1300))
-  // returns a set of ids where the value of the "timestamp" property is in the given range
-
-```
-
-
-## Assignment Part 3 – Child Stores
-
-Sometimes it’s very useful to have nested transactions – so we can commit (or throw away) changes in bulk. Let’s support this. We are going to represent such pending transactions by using a “child store” concept. Here’s how it could work:
-
-```
-
-  Store store;
-  store.insert(id = 2133, properties = { "title" => "Buy Milk", 
-                                         "description" => "made of almonds!" })
-
-  // 1. Create a child store
-
-  Store child = store.create_child();
-
-
-  // 2. Use it to insert, get, update, delete, and query entities
-
-  child.get(id = 2133) // returns { "title" => "Buy Milk", "description" => "made of almonds!" }
-
-  child.update(id = 2133, { "title" => "Buy Cream" })
-
-  child.get(id = 2133) // returns { "title" => "Buy Cream", "description" => "made of almonds!" }
-
-  store.get(id = 2133) // returns { "title" => "Buy Milk", "description" => "made of almonds!" }
-
-  child.query("title" => "Buy Cream") // returns { 2133 }
-
-
-  // 3. Remove the child store and commit its changes to the parent
-
-  child.commit()
-
-  store.get(id = 2133) // returns { "title" => "Buy Cream", "description" => "made of almonds!" }
-
-```
-
-The design space for the implementation of child stores is large, and the decisions you make might also affect your implementation of Assigments 1 and 2. Please comment on these decisions in your code.
-
-Please also elaborate in a comment in your code what would happen in a situation where the main store has two children (i.e. siblings), both of which contain pending changes to the same entity, and one of them is committed to the parent store. What, in your opinion, are good ways to deal with this situation?
-
-
-## Assignment Part 4 – Performance Considerations
-
-Please brainstorm in a comment in your code how you could improve the performance of your `range_query` implementation. You should take child stores from Part 3 into account.
+## Things to remark and brainstorming
+* In order to improve the performance when querying ids by title or by a timestamp range, two property-id associative containers were created. This way when a todo is inserted, updated or removed, the related id is inserted, updated or removed from a id set so is faster to retrieve it when querying.
+* A benchmark test report can be seen in test_benchmarks/results/last_version.
+    * Inserting: 100ns
+    * Updating: 210ns
+    * Retrieving: 159ns
+    * Removing: 6ns
+    * Querying a title returning 1 todo: 70ns
+    * Querying a title returning 1000 todos: 30us
+    * Querying a range returning 1 todo: 8ns
+    * Querying a range returning 1000 todos: 82us 
+    * Creating child: 42ns
+    * Committing child: 106ns
+* Also a new benchmark test report can be created just running the benchmarks test as it is explained in [Running benchmark test](#running-benchmark-tests) section.
+* Children have a pointer the the parent, so it can get and query todos from the parent avoiding the need to copy the parent when creating the child.
+* When two children commit the same changes to a parent, the parent keep the changes of the last children(so the child changes that commit first will be loose event if the changes were done after the changes of the other child).
+* All examples of using the entity store can be seen and executed in the test_entity_store code and executable.
+* There are still many edge cases for testing and memory accessing protections to be included.
+* Children committing in different threads needs to be correctly synchronized (there is no concurrent threading synchronization mechanism right now).
+* In order to improve the range_query C++20 range views features can be used (from rangeV3 or boost libraries). This way a view of the existing id set can be created filtering the elements by a title or a timestamp range. If the client only needs to perform read operations is the fastest way. If the client needs to perform write operations with the id set, a copy would be necessary.

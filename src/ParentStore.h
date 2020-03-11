@@ -32,7 +32,6 @@ private:
      * in order to improve the timestamp range query feature.
      */
     DoublePropertyIds timestampIds;
-    std::list<std::shared_ptr<Store>> children;
 };
 
 

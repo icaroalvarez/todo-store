@@ -27,11 +27,8 @@ private:
     /**
      * A sorted container is more convenient than an unordered one to improve
      * the performance while searching ranges (from min value to mas value).
-     * A multi map is more convenient because more than one id can have the
-     * same timestamp and makes it faster to create the output set when calling
-     * rangeQuery that having a std::multimap<double, std::unordered_set<std::int64_t>.
      */
-    std::multimap<double, std::int64_t> propertyIds;
+    std::map<double, std::unordered_set<std::int64_t>> propertyIds;
 };
 
 

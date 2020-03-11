@@ -56,16 +56,20 @@ TodoProperties ParentStore::get(std::int64_t id) const
 
 void ParentStore::remove(std::int64_t id)
 {
-    /**
-     * Remove also the id from titleIds and timestamp ids.
-     */
-    const auto& title{todos.at(id).title};
-    titleIds.remove(title, id);
+    const auto todoExits{todos.find(id) not_eq todos.end()};
+    if(todoExits)
+    {
+        /**
+         * Remove also the id from titleIds and timestamp ids.
+         */
+        const auto &title{todos.at(id).title};
+        titleIds.remove(title, id);
 
-    const auto& timestamp{todos.at(id).timestamp};
-    timestampIds.remove(timestamp, id);
+        const auto &timestamp{todos.at(id).timestamp};
+        timestampIds.remove(timestamp, id);
 
-    todos.erase(id);
+        todos.erase(id);
+    }
 }
 
 bool ParentStore::checkId(std::int64_t id)
@@ -94,9 +98,11 @@ std::unordered_set<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, do
 
 std::shared_ptr<Store> ParentStore::createChild()
 {
-    auto store{std::make_shared<ChildStore>(shared_from_this())};
-    children.push_back(store);
-    return store;
+    /**
+     * Children have a pointer to parent so they can get todos and performance id queries
+     * from the parent without the need to copy all the parent todos into the child.
+     */
+    return std::make_shared<ChildStore>(shared_from_this());
 }
 
 void ParentStore::commit()

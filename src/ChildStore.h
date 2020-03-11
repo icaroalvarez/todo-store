@@ -23,15 +23,21 @@ public:
     std::shared_ptr<Store> createChild() override;
     void commit() override;
 private:
+    /**
+     * Keep the todos in maps so the actual operations will be performance
+     * in the todos of the parent when commiting the child
+     * */
     std::unordered_map<std::int64_t, TodoProperties> todosToBeInserted;
     std::unordered_map<std::int64_t, TodoProperties> propertiesToBeUpdated;
-    std::set<std::int64_t> idsToBeRemoved;
-    std::weak_ptr<Store> parent;
+    std::unordered_set<std::int64_t> todosToBeRemoved;
+    std::weak_ptr<Store> parent; // Use weak_ptr for avoiding circular dependency
+    /**
+     * Keep a list of ids for improving queries performance
+     */
     StringPropertyIds titleIds;
-    std::unordered_map<std::string, std::unordered_set<std::int64_t>> oldTitleIdsToBeUpdated;
-
-    std::multimap<double, std::int64_t> oldTimestampIdsToBeUpdated;
     DoublePropertyIds timestampIds;
+    std::unordered_map<std::string, std::unordered_set<std::int64_t>> oldTitleIdsToBeUpdated;
+    std::multimap<double, std::int64_t> oldTimestampIdsToBeUpdated;
 };
 
 

@@ -7,6 +7,54 @@ using namespace std::string_literals;
 
 constexpr auto totalTodos{1000};
 
+TEST_CASE("StringPropertyIds")
+{
+    StringPropertyIds propertyIds;
+    for(int i=0; i < totalTodos; i++)
+    {
+        propertyIds.insert("title", i);
+    }
+
+    BENCHMARK("inserting")
+                {
+                    return propertyIds.insert("title", totalTodos);
+                };
+
+    BENCHMARK("updating")
+                {
+                    return propertyIds.updateProperty("title", "newTitle", 0);
+                };
+
+    BENCHMARK("query")
+                {
+                    return propertyIds.getIds("title");
+                };
+}
+
+TEST_CASE("DoublePropertyIds")
+{
+    DoublePropertyIds propertyIds;
+    for(int i=0; i < totalTodos; i++)
+    {
+        propertyIds.insert(i, i);
+    }
+
+    BENCHMARK("inserting")
+                {
+                    return propertyIds.insert(0, totalTodos);
+                };
+
+    BENCHMARK("updating")
+                {
+                    return propertyIds.updateProperty(0, 1, 0);
+                };
+
+    BENCHMARK("query")
+                {
+                    return propertyIds.getRangeIds(0, 1);
+                };
+}
+
 ParentStore createDummyStore()
 {
     auto timestampInitialValue{0.0};
@@ -38,21 +86,21 @@ TEST_CASE("Basic store")
                                             {"timestamp",   2392348.12233}};
     BENCHMARK("updating")
                 {
-                    return store.update(id, propertiesToUpdate);
+                    return store.update(0, propertiesToUpdate);
                 };
 
     BENCHMARK("retrieving properties")
                 {
-                    return store.get(id);
+                    return store.get(0);
                 };
 
     BENCHMARK("removing")
                 {
-                    return store.remove(id);
+                    return store.remove(0);
                 };
 }
 
-TEST_CASE("Query small store")
+TEST_CASE("Query small store (contains only one todo)")
 {
     constexpr auto id{2133};
     const TodoProperties properties{{"title", "Buy Milk"s},
@@ -77,7 +125,7 @@ TEST_CASE("Query small store")
 
 }
 
-TEST_CASE("Query big store")
+TEST_CASE("Query big store (contains 1000 todos with the same title)")
 {
     ParentStore store{createDummyStore()};
 

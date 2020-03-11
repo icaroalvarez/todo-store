@@ -14,7 +14,7 @@ add_executable(test_entity_store
 
 target_link_libraries(test_entity_store PRIVATE
         entity_store
-        CONAN_PKG::Catch2
+        catch2
         )
 
 target_include_directories(test_entity_store PRIVATE
