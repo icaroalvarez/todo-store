@@ -105,7 +105,7 @@ TEST_CASE("Query small store (contains only one todo)")
     constexpr auto id{2133};
     const TodoProperties properties{{"title", "Buy Milk"s},
                                     {"description", "make of almonds!"s},
-                                    {"timestamp", 2392348.12233}};
+                                    {"timestamp", 1100.12233}};
 
     ParentStore store;
     store.insert(id, properties);
