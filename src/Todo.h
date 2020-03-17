@@ -3,8 +3,12 @@
 #include <variant>
 #include <unordered_map>
 
-using TodoProperty = std::pair<std::string, std::variant<std::string, double>>;
-using TodoProperties = std::unordered_map<std::string, std::variant<std::string, double>>;
+constexpr std::string_view titleKey{"title"};
+constexpr std::string_view descriptionKey{"title"};
+constexpr std::string_view timestampKey{"timestamp"};
+
+using TodoProperty = std::pair<std::string_view, std::variant<std::string, double>>;
+using TodoProperties = std::unordered_map<std::string_view, std::variant<std::string, double>>;
 
 struct Todo
 {

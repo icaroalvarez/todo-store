@@ -4,9 +4,9 @@
 
 void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
 {
-    const auto& title{std::get<std::string>(properties.at("title"))};
-    const auto& description{std::get<std::string>(properties.at("description"))};
-    const auto& timestamp{std::get<double>(properties.at("timestamp"))};
+    const auto& title{std::get<std::string>(properties.at(titleKey))};
+    const auto& description{std::get<std::string>(properties.at(descriptionKey))};
+    const auto& timestamp{std::get<double>(properties.at(timestampKey))};
     todos[id]=Todo{id, title, description, timestamp};
 
     /**
@@ -23,23 +23,23 @@ void ParentStore::update(std::int64_t id, const TodoProperties &properties)
      */
     for(const auto& property : properties)
     {
-        if(property.first == "title")
+        if(property.first == titleKey)
         {
             const auto& newTitle{std::get<std::string>(property.second)};
             const auto oldTitle{std::move(todos.at(id).title)};
             todos.at(id).title = newTitle;
             titleIds.updateProperty(oldTitle, newTitle, id);
-        }else if(property.first == "description")
+        }else if(property.first == descriptionKey)
         {
             todos.at(id).description = std::get<std::string>(property.second);
-        }else if(property.first == "timestamp")
+        }else if(property.first == timestampKey)
         {
             const auto& newTimestamp{std::get<double>(property.second)};
             const auto& oldTimestamp{todos.at(id).timestamp};
             timestampIds.updateProperty(oldTimestamp, newTimestamp, id);
             todos.at(id).timestamp = newTimestamp;
         }else{
-            throw std::invalid_argument("Unknown property: "+property.first);
+            throw std::invalid_argument("Unknown property: "+std::string(property.first));
         }
     }
 }
@@ -48,9 +48,9 @@ TodoProperties ParentStore::get(std::int64_t id) const
 {
     const auto& todo{todos.at(id)};
     return {
-            {"title",       todo.title},
-            {"description", todo.description},
-            {"timestamp",   todo.timestamp}
+            {titleKey,       todo.title},
+            {descriptionKey, todo.description},
+            {timestampKey,   todo.timestamp}
     };
 }
 
@@ -83,7 +83,7 @@ std::unordered_set<std::int64_t> ParentStore::query(const TodoProperty& property
      * Only title is supported but supporting also description is very trivial.
      */
     std::unordered_set<std::int64_t> ids;
-    if(property.first == "title")
+    if(property.first == titleKey)
     {
         const auto& title{std::get<std::string>(property.second)};
         ids = titleIds.getIds(title);

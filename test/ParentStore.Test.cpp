@@ -6,13 +6,22 @@ using namespace std::string_literals;
 
 bool compareTodoProperties(const TodoProperties& lhs, const TodoProperties& rhs)
 {
-    const auto sameTitle{std::get<std::string>(lhs.at("title")) ==
-                         std::get<std::string>(rhs.at("title"))};
-    const auto sameDescription{std::get<std::string>(lhs.at("description")) ==
-                               std::get<std::string>(rhs.at("description"))};
-    const auto sameTimestamp{std::get<double>(lhs.at("timestamp")) ==
-                             std::get<double>(rhs.at("timestamp"))};
+    const auto sameTitle{std::get<std::string>(lhs.at(titleKey)) ==
+                         std::get<std::string>(rhs.at(titleKey))};
+    const auto sameDescription{std::get<std::string>(lhs.at(descriptionKey)) ==
+                               std::get<std::string>(rhs.at(descriptionKey))};
+    const auto sameTimestamp{std::get<double>(lhs.at(timestampKey)) ==
+                             std::get<double>(rhs.at(timestampKey))};
     return sameTitle && sameDescription && sameTimestamp;
+}
+
+TodoProperties createProperties(std::string title, std::string description, double timestamp)
+{
+    return {
+            {titleKey, title},
+            {descriptionKey, description},
+            {timestampKey, timestamp}
+    };
 }
 
 SCENARIO("Basic store")
@@ -24,9 +33,9 @@ SCENARIO("Basic store")
         WHEN("A todo is inserted")
         {
             constexpr auto id{2133};
-            const TodoProperties properties{{"title",       "Buy Milk"s},
-                                            {"description", "make of almonds!"s},
-                                            {"timestamp",   2392348.12233}};
+            const auto properties{createProperties("Buy Milk"s,
+                                                   "make of almonds!"s,
+                                                   2392348.12233)};
             store.insert(id, properties);
 
             THEN("The properties of the todo id can be retrieved")
@@ -37,9 +46,9 @@ SCENARIO("Basic store")
 
             THEN("The todo id properties can be updated")
             {
-                const TodoProperties propertiesToUpdate{{"title",       "Buy Milk"s},
-                                                        {"description", "make of almonds!"s},
-                                                        {"timestamp",   2392348.12233}};
+                const auto propertiesToUpdate{createProperties("Buy Chocolate"s,
+                        "yummy!"s,
+                        2392348.12233)};
                 store.update(id, propertiesToUpdate);
                 const auto& retrievedProperties{store.get(id)};
                 REQUIRE(compareTodoProperties(retrievedProperties, propertiesToUpdate));
@@ -61,18 +70,21 @@ ParentStore createDummyStore()
 {
     ParentStore store;
     auto id{0};
-    store.insert(id++, {{"title", "Buy Milk"s},
-                        {"description", "make of almonds!"s},
-                        {"timestamp", 2392348.12233}});
-    store.insert(id++, {{"title", "Buy Milk"s},
-                        {"description", "don't forget!"s},
-                        {"timestamp", 2400050.12555}});
-    store.insert(id++, {{"title", "Study Chinese"s},
-                        {"description", "worth it!"s},
-                        {"timestamp", 1000.0}});
-    store.insert(id, {{"title", "Call mom"s},
-                      {"description", "is her birthday"s},
-                      {"timestamp", 1200.0}});
+    auto todoProperty{createProperties("Buy Milk"s,
+            "make of almonds!"s, 2392348.12233)};
+    store.insert(id++, todoProperty);
+
+    todoProperty = {createProperties("Buy Milk"s,
+                             "don't forget!"s, 2400050.12555)};
+    store.insert(id++, todoProperty);
+
+    todoProperty = {createProperties("Study Chinese"s,
+                                     "worth it!"s, 1000.0)};
+    store.insert(id++, todoProperty);
+
+    todoProperty = {createProperties("Call mom"s,
+                                     "is her birthday"s, 1200.0)};
+    store.insert(id, todoProperty);
     return store;
 }
 
@@ -84,7 +96,7 @@ SCENARIO("Store queries")
 
         THEN("A set of todo ids can be queried from the store")
         {
-            TodoProperty queryProperty{"title", "Buy Milk"s};
+            TodoProperty queryProperty{titleKey, "Buy Milk"s};
             auto ids{store.query(queryProperty)};
             std::unordered_set<std::int64_t> expectedIds{0, 1};
             REQUIRE(std::is_permutation(expectedIds.cbegin(), expectedIds.cend(), ids.cbegin()));
@@ -92,7 +104,7 @@ SCENARIO("Store queries")
             AND_WHEN("A todo title is updated")
             {
                 constexpr auto idToUpdate{1};
-                const TodoProperties propertiesToUpdate{{"title", "Buy Cereals"s}};
+                const TodoProperties propertiesToUpdate{{titleKey, "Buy Cereals"s}};
                 store.update(idToUpdate, propertiesToUpdate);
 
                 THEN("The query result do not include the updated todo id")
@@ -104,7 +116,7 @@ SCENARIO("Store queries")
 
                 THEN("The updated todo can be retrieved when querying with the updated title")
                 {
-                    queryProperty = {"title", "Buy Cereals"s};
+                    queryProperty = {titleKey, "Buy Cereals"s};
                     ids = store.query(queryProperty);
                     expectedIds = {1};
                     REQUIRE(ids == expectedIds);

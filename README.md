@@ -31,11 +31,11 @@ make
 * A benchmark test report can be seen in test_benchmarks/results/last_version.
     * Inserting: 100ns
     * Updating: 210ns
-    * Retrieving: 159ns
+    * Retrieving: 110ns
     * Removing: 6ns
     * Querying a title returning 1 todo: 70ns
     * Querying a title returning 1000 todos: 30us
-    * Querying a range returning 1 todo: 8ns
+    * Querying a range returning 1 todo: 86ns
     * Querying a range returning 1000 todos: 82us 
     * Creating child: 42ns
     * Committing child: 106ns
