@@ -24,8 +24,8 @@ void DoublePropertyIds::updateProperty(double oldPropertyValue,
                                        double newPropertyValue,
                                        std::int64_t id)
 {
-    remove(oldPropertyValue, id);
-    insert(newPropertyValue, id);
+    remove(oldPropertyValue, id); // Best case O(1), worst case O(log n)
+    insert(newPropertyValue, id); // Complexity O(log n)
 }
 
 void DoublePropertyIds::remove(double property, std::int64_t id)

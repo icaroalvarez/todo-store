@@ -7,13 +7,13 @@ void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
     const auto& title{std::get<std::string>(properties.at(titleKey))};
     const auto& description{std::get<std::string>(properties.at(descriptionKey))};
     const auto& timestamp{std::get<double>(properties.at(timestampKey))};
-    todos[id]=Todo{id, title, description, timestamp};
+    todos[id]=Todo{id, title, description, timestamp}; // Complexity O(1), O(N) if rehashing is needed.
 
     /**
      * lets keep a track of the ids related to title and timestamp in order to improve queries performance
      */
-    titleIds.insert(title, id);
-    timestampIds.insert(timestamp, id);
+    titleIds.insert(title, id); // Complexity O(1), O(N) if rehashing is needed.
+    timestampIds.insert(timestamp, id); // Complexity O(log n)
 }
 
 void ParentStore::update(std::int64_t id, const TodoProperties &properties)
@@ -56,6 +56,7 @@ TodoProperties ParentStore::get(std::int64_t id) const
 
 void ParentStore::remove(std::int64_t id)
 {
+    // find todos complexity O(1), worst case O(N)
     const auto todoExits{todos.find(id) not_eq todos.end()};
     if(todoExits)
     {
@@ -63,12 +64,12 @@ void ParentStore::remove(std::int64_t id)
          * Remove also the id from titleIds and timestamp ids.
          */
         const auto &title{todos.at(id).title};
-        titleIds.remove(title, id);
+        titleIds.remove(title, id); // Complexity O(1), worst case O(N)
 
         const auto &timestamp{todos.at(id).timestamp};
-        timestampIds.remove(timestamp, id);
+        timestampIds.remove(timestamp, id); // Best case O(1), worst case O(log n)
 
-        todos.erase(id);
+        todos.erase(id); // Complexity average O(1), worst case O(N)
     }
 }
 

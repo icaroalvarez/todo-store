@@ -34,7 +34,7 @@ TEST_CASE("StringPropertyIds")
                     return propertyIds.updateProperty("title", "newTitle", 0);
                 };
 
-    BENCHMARK("query")
+    BENCHMARK("querying 1000 todos")
                 {
                     return propertyIds.getIds("title");
                 };
@@ -58,9 +58,14 @@ TEST_CASE("DoublePropertyIds")
                     return propertyIds.updateProperty(0, 1, 0);
                 };
 
-    BENCHMARK("query")
+    BENCHMARK("querying 1 todo")
                 {
                     return propertyIds.getRangeIds(0, 1);
+                };
+
+    BENCHMARK("querying 1000 todo")
+                {
+                    return propertyIds.getRangeIds(0, totalTodos);
                 };
 }
 
