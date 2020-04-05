@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 set(test_source_files
         main.test.cpp
-        Benchmark.Test.cpp
+        Store.Benchmark.cpp
+        DoublePropertyIds.Benchmark.cpp
+        StringPropertyIds.Benchmark.cpp
         )
 
 add_executable(test_entity_store_benchmarks
