@@ -8,6 +8,7 @@ void StringPropertyIds::insert(const std::string& property, std::int64_t id)
 
 std::unordered_set<std::int64_t> StringPropertyIds::getIds(const std::string& property) const
 {
+    // Find complexity average constant O(1), worst case O(N) (In case all keys are in same bucket)
     std::unordered_set<std::int64_t> ids;
     if(propertyIds.find(property) not_eq propertyIds.end())
     {
@@ -26,16 +27,17 @@ void StringPropertyIds::updateProperty(const std::string &oldProperty,
 
 void StringPropertyIds::remove(const std::string &property, std::int64_t id)
 {
-    const auto propertyExists{propertyIds.find(property) not_eq propertyIds.end()};
+    // Find complexity average constant O(1), worst case O(N) (In case all keys are in same bucket)
+    auto it{propertyIds.find(property)};
+    const auto propertyExists{it not_eq propertyIds.end()};
     if(propertyExists)
     {
-        auto &ids{propertyIds.at(property)};
-        if (ids.size() > 1)
+        if (it->second.size() > 1)
         {
-            ids.erase(id); // Complexity O(1), worst case O(N)
+            it->second.erase(id); // Complexity O(1), worst case O(N)
         } else
         {
-            propertyIds.erase(property); // Complexity O(1), worst case O(N)
+            propertyIds.erase(it); // Complexity O(1)
         }
     }
 }

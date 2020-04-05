@@ -3,6 +3,7 @@
 
 void DoublePropertyIds::insert(double property, std::int64_t id)
 {
+    // logarithmic complexity Nlog(size+N) (implementations may optimize if the range is already sorted)
     propertyIds[property].insert(id);
 }
 
@@ -30,16 +31,17 @@ void DoublePropertyIds::updateProperty(double oldPropertyValue,
 
 void DoublePropertyIds::remove(double property, std::int64_t id)
 {
-    const auto propertyExists{propertyIds.find(property) not_eq propertyIds.end()};
+    // find has logarithmic complexity O(log n)
+    auto it{propertyIds.find(property)};
+    const auto propertyExists{it not_eq propertyIds.end()};
     if(propertyExists)
     {
-        auto& ids{propertyIds.at(property)};
-        if (ids.size() > 1)
+        if (it->second.size() > 1)
         {
-            ids.erase(id);
+            it->second.erase(id); // Complexity O(1), worst case O(N)
         } else
         {
-            propertyIds.erase(property);
+            propertyIds.erase(it); // Complexity O(1)
         }
     }
 }

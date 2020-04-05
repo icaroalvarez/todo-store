@@ -4,14 +4,13 @@
 #include <ParentStore.h>
 
 using namespace std::string_literals;
-
 constexpr auto totalTodos{1000};
 
 TodoProperties createProperties(std::string title, std::string description, double timestamp)
 {
     return {
-            {titleKey, title},
-            {descriptionKey, description},
+            {titleKey, std::move(title)},
+            {descriptionKey, std::move(description)},
             {timestampKey, timestamp}
     };
 }
@@ -19,24 +18,31 @@ TodoProperties createProperties(std::string title, std::string description, doub
 TEST_CASE("StringPropertyIds")
 {
     StringPropertyIds propertyIds;
+    constexpr auto title{"title"};
     for(int i=0; i < totalTodos; i++)
     {
-        propertyIds.insert("title", i);
+        propertyIds.insert(title, i);
     }
 
     BENCHMARK("inserting")
                 {
-                    return propertyIds.insert("title", totalTodos);
+                    return propertyIds.insert(title, totalTodos);
+                };
+
+    constexpr auto idToBeRemoved{42};
+    BENCHMARK("removing")
+                {
+                    return propertyIds.remove(title, idToBeRemoved);
                 };
 
     BENCHMARK("updating")
                 {
-                    return propertyIds.updateProperty("title", "newTitle", 0);
+                    return propertyIds.updateProperty(title, "newTitle", 0);
                 };
 
     BENCHMARK("querying 1000 todos")
                 {
-                    return propertyIds.getIds("title");
+                    return propertyIds.getIds(title);
                 };
 }
 
@@ -48,9 +54,16 @@ TEST_CASE("DoublePropertyIds")
         propertyIds.insert(i, i);
     }
 
+    constexpr auto idToBeInserted{totalTodos};
     BENCHMARK("inserting")
                 {
-                    return propertyIds.insert(0, totalTodos);
+                    return propertyIds.insert(0, idToBeInserted);
+                };
+
+    constexpr auto idToBeRemoved{42};
+    BENCHMARK("removing")
+                {
+                    return propertyIds.remove(0, idToBeRemoved);
                 };
 
     BENCHMARK("updating")
