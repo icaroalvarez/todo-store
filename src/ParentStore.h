@@ -15,10 +15,10 @@ public:
     void update(std::int64_t id, const TodoProperties& properties) override;
     TodoProperties get(std::int64_t id) const override;
     void remove(std::int64_t id) override;
-    bool checkId(std::int64_t id) override;
+    bool checkId(std::int64_t id) const override;
     std::unordered_set<std::int64_t> query(const TodoProperty& property) const override;
     std::unordered_set<std::int64_t> rangeQuery(double minTimeStamp, double maxTimeStamp) const override;
-    std::shared_ptr<Store> createChild() override;
+    std::unique_ptr<Store> createChild() override;
     void commit() override;
 private:
     std::unordered_map<std::int64_t, Todo> todos;

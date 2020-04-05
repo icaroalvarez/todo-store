@@ -6,16 +6,17 @@ set(test_source_files
         ParentStore.Test.cpp
         StringPropertyIds.Test.cpp
         DoublePropertyIds.Test.cpp
+        TestUtils
         )
 
-add_executable(test_entity_store
+add_executable(test_todo_store
         ${test_source_files}
         )
 
-target_link_libraries(test_entity_store PRIVATE
-        entity_store
+target_link_libraries(test_todo_store PRIVATE
+        todo_store
         catch2
         )
 
-target_include_directories(test_entity_store PRIVATE
+target_include_directories(test_todo_store PRIVATE
         ../src)

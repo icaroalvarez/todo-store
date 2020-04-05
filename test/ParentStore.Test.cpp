@@ -1,28 +1,9 @@
 #include "catch2/catch.hpp"
 #include <Store.h>
 #include <ParentStore.h>
+#include "TestUtils.h"
 
 using namespace std::string_literals;
-
-bool compareTodoProperties(const TodoProperties& lhs, const TodoProperties& rhs)
-{
-    const auto sameTitle{std::get<std::string>(lhs.at(titleKey)) ==
-                         std::get<std::string>(rhs.at(titleKey))};
-    const auto sameDescription{std::get<std::string>(lhs.at(descriptionKey)) ==
-                               std::get<std::string>(rhs.at(descriptionKey))};
-    const auto sameTimestamp{std::get<double>(lhs.at(timestampKey)) ==
-                             std::get<double>(rhs.at(timestampKey))};
-    return sameTitle && sameDescription && sameTimestamp;
-}
-
-TodoProperties createProperties(std::string title, std::string description, double timestamp)
-{
-    return {
-            {titleKey, title},
-            {descriptionKey, description},
-            {timestampKey, timestamp}
-    };
-}
 
 SCENARIO("Basic store")
 {
@@ -33,7 +14,7 @@ SCENARIO("Basic store")
         WHEN("A todo is inserted")
         {
             constexpr auto id{2133};
-            const auto properties{createProperties("Buy Milk"s,
+            const auto properties{TestUtils::createProperties("Buy Milk"s,
                                                    "make of almonds!"s,
                                                    2392348.12233)};
             store.insert(id, properties);
@@ -41,17 +22,17 @@ SCENARIO("Basic store")
             THEN("The properties of the todo id can be retrieved")
             {
                 const auto& retrievedProperties{store.get(id)};
-                REQUIRE(compareTodoProperties(retrievedProperties, properties));
+                REQUIRE(TestUtils::compareTodoProperties(retrievedProperties, properties));
             }
 
             THEN("The todo id properties can be updated")
             {
-                const auto propertiesToUpdate{createProperties("Buy Chocolate"s,
+                const auto propertiesToUpdate{TestUtils::createProperties("Buy Chocolate"s,
                         "yummy!"s,
                         2392348.12233)};
                 store.update(id, propertiesToUpdate);
                 const auto& retrievedProperties{store.get(id)};
-                REQUIRE(compareTodoProperties(retrievedProperties, propertiesToUpdate));
+                REQUIRE(TestUtils::compareTodoProperties(retrievedProperties, propertiesToUpdate));
             }
 
 
@@ -66,33 +47,11 @@ SCENARIO("Basic store")
     }
 };
 
-ParentStore createDummyStore()
-{
-    ParentStore store;
-    auto id{0};
-    auto todoProperty{createProperties("Buy Milk"s,
-            "make of almonds!"s, 2392348.12233)};
-    store.insert(id++, todoProperty);
-
-    todoProperty = {createProperties("Buy Milk"s,
-                             "don't forget!"s, 2400050.12555)};
-    store.insert(id++, todoProperty);
-
-    todoProperty = {createProperties("Study Chinese"s,
-                                     "worth it!"s, 1000.0)};
-    store.insert(id++, todoProperty);
-
-    todoProperty = {createProperties("Call mom"s,
-                                     "is her birthday"s, 1200.0)};
-    store.insert(id, todoProperty);
-    return store;
-}
-
 SCENARIO("Store queries")
 {
     GIVEN("A store with some todos")
     {
-        ParentStore store{createDummyStore()};
+        ParentStore store{TestUtils::createDummyParentStore()};
 
         THEN("A set of todo ids can be queried from the store")
         {
@@ -153,7 +112,7 @@ SCENARIO("Store queries")
 
                 THEN("The query do not include the updated todo id")
                 {
-                    auto ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
+                    ids = store.rangeQuery(minTimeStamp, maxTimeStamp);
                     expectedIds = {2};
                     REQUIRE(ids == expectedIds);
                 }

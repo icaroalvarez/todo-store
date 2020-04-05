@@ -12,25 +12,25 @@
 class ChildStore: public Store
 {
 public:
-    explicit ChildStore(const std::shared_ptr<Store>& parent);
+    explicit ChildStore(std::shared_ptr<Store> parent);
     void insert(std::int64_t id, const TodoProperties& properties) override;
     void update(std::int64_t id, const TodoProperties& properties) override;
     TodoProperties get(std::int64_t id) const override;
     void remove(std::int64_t id) override;
-    bool checkId(std::int64_t id) override;
+    bool checkId(std::int64_t id) const override;
     std::unordered_set<std::int64_t> query(const TodoProperty& property) const override;
     std::unordered_set<std::int64_t> rangeQuery(double minTimeStamp, double maxTimeStamp) const override;
-    std::shared_ptr<Store> createChild() override;
+    std::unique_ptr<Store> createChild() override;
     void commit() override;
 private:
     /**
      * Keep the todos in maps so the actual operations will be performance
-     * in the todos of the parent when commiting the child
+     * in the todos of the parent when committing the child
      * */
     std::unordered_map<std::int64_t, TodoProperties> todosToBeInserted;
     std::unordered_map<std::int64_t, TodoProperties> propertiesToBeUpdated;
     std::unordered_set<std::int64_t> todosToBeRemoved;
-    std::weak_ptr<Store> parent; // Use weak_ptr for avoiding circular dependency
+    std::shared_ptr<Store> parent;
     /**
      * Keep a list of ids for improving queries performance
      */

@@ -4,9 +4,21 @@
 
 void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
 {
-    const auto& title{std::get<std::string>(properties.at(titleKey))};
-    const auto& description{std::get<std::string>(properties.at(descriptionKey))};
-    const auto& timestamp{std::get<double>(properties.at(timestampKey))};
+    const auto titleIt{properties.find(titleKey)};
+    const auto titlePresent{titleIt not_eq properties.end()};
+    const auto descriptionIt{properties.find(descriptionKey)};
+    const auto descriptionPresent{descriptionIt not_eq properties.end()};
+    const auto timestampIt{properties.find(timestampKey)};
+    const auto timestampPresent{timestampIt not_eq properties.end()};
+    const auto allPropertiesPresent{titlePresent and descriptionPresent and timestampPresent};
+    if(not allPropertiesPresent)
+    {
+        throw std::invalid_argument("Missing properties when inserting a todo in the store. "
+                                    "Please review that all properties are specified");
+    }
+    const auto& title{std::get<std::string>(titleIt->second)};
+    const auto& description{std::get<std::string>(descriptionIt->second)};
+    const auto& timestamp{std::get<double>(timestampIt->second)};
     todos[id]=Todo{id, title, description, timestamp}; // Complexity O(1), O(N) if rehashing is needed.
 
     /**
@@ -16,30 +28,37 @@ void ParentStore::insert(std::int64_t id, const TodoProperties& properties)
     timestampIds.insert(timestamp, id); // Complexity O(log n)
 }
 
-void ParentStore::update(std::int64_t id, const TodoProperties &properties)
+void ParentStore::update(std::int64_t id, const TodoProperties& properties)
 {
-    /**
-     * Update also the id from titleIds and timestampIds!
-     */
-    for(const auto& property : properties)
+    auto todoIt{todos.find(id)};
+    const auto idExists{todoIt not_eq todos.end()};
+
+    if(not idExists)
     {
-        if(property.first == titleKey)
+        throw std::invalid_argument("Error updating properties. "
+                                    "Todo with id "+std::to_string(id)+" not found");
+    }
+
+    for (const auto& property : properties)
+    {
+        if (property.first == titleKey)
         {
             const auto& newTitle{std::get<std::string>(property.second)};
-            const auto oldTitle{std::move(todos.at(id).title)};
-            todos.at(id).title = newTitle;
+            const auto oldTitle{std::move(todoIt->second.title)};
+            todoIt->second.title = newTitle;
             titleIds.updateProperty(oldTitle, newTitle, id);
-        }else if(property.first == descriptionKey)
+        } else if (property.first == descriptionKey)
         {
-            todos.at(id).description = std::get<std::string>(property.second);
-        }else if(property.first == timestampKey)
+            todoIt->second.description = std::get<std::string>(property.second);
+        } else if (property.first == timestampKey)
         {
             const auto& newTimestamp{std::get<double>(property.second)};
-            const auto& oldTimestamp{todos.at(id).timestamp};
+            const auto& oldTimestamp{todoIt->second.timestamp};
             timestampIds.updateProperty(oldTimestamp, newTimestamp, id);
-            todos.at(id).timestamp = newTimestamp;
-        }else{
-            throw std::invalid_argument("Unknown property: "+std::string(property.first));
+            todoIt->second.timestamp = newTimestamp;
+        } else
+        {
+            throw std::invalid_argument("Unknown property: " + std::string(property.first));
         }
     }
 }
@@ -57,23 +76,23 @@ TodoProperties ParentStore::get(std::int64_t id) const
 void ParentStore::remove(std::int64_t id)
 {
     // find todos complexity O(1), worst case O(N)
-    const auto todoExits{todos.find(id) not_eq todos.end()};
-    if(todoExits)
+    auto it{todos.find(id)};
+    const auto todoExits{it not_eq todos.end()};
+    if(not todoExits)
     {
-        /**
-         * Remove also the id from titleIds and timestamp ids.
-         */
-        const auto &title{todos.at(id).title};
-        titleIds.remove(title, id); // Complexity O(1), worst case O(N)
-
-        const auto &timestamp{todos.at(id).timestamp};
-        timestampIds.remove(timestamp, id); // Best case O(1), worst case O(log n)
-
-        todos.erase(id); // Complexity average O(1), worst case O(N)
+        throw std::invalid_argument("Error removing todo. "
+                                    "Todo with id "+std::to_string(id)+" not found");
     }
+    const auto &title{it->second.title};
+    titleIds.remove(title, id); // Complexity constant O(1), worst case O(N)
+
+    const auto &timestamp{it->second.timestamp};
+    timestampIds.remove(timestamp, id); // Complexity logarithmic O(log n)
+
+    todos.erase(it); // Complexity constant O(1)
 }
 
-bool ParentStore::checkId(std::int64_t id)
+bool ParentStore::checkId(std::int64_t id) const
 {
     return todos.find(id) not_eq todos.end();
 }
@@ -97,13 +116,13 @@ std::unordered_set<std::int64_t> ParentStore::rangeQuery(double minTimeStamp, do
     return timestampIds.getRangeIds(minTimeStamp, maxTimeStamp);
 }
 
-std::shared_ptr<Store> ParentStore::createChild()
+std::unique_ptr<Store> ParentStore::createChild()
 {
     /**
      * Children have a pointer to parent so they can get todos and performance id queries
      * from the parent without the need to copy all the parent todos into the child.
      */
-    return std::make_shared<ChildStore>(shared_from_this());
+    return std::make_unique<ChildStore>(shared_from_this());
 }
 
 void ParentStore::commit()

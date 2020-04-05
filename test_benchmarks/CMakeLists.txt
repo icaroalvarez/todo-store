@@ -7,14 +7,14 @@ set(test_source_files
         StringPropertyIds.Benchmark.cpp
         )
 
-add_executable(test_entity_store_benchmarks
+add_executable(test_todo_store_benchmarks
         ${test_source_files}
         )
 
-target_link_libraries(test_entity_store_benchmarks PRIVATE
-        entity_store
+target_link_libraries(test_todo_store_benchmarks PRIVATE
+        todo_store
         catch2
         )
 
-target_include_directories(test_entity_store_benchmarks PRIVATE
+target_include_directories(test_todo_store_benchmarks PRIVATE
         ../src)

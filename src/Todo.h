@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 constexpr std::string_view titleKey{"title"};
-constexpr std::string_view descriptionKey{"title"};
+constexpr std::string_view descriptionKey{"description"};
 constexpr std::string_view timestampKey{"timestamp"};
 
 using TodoProperty = std::pair<std::string_view, std::variant<std::string, double>>;

@@ -22,7 +22,7 @@ ParentStore createDummyStore()
     for(int i=0; i < totalTodos; i++)
     {
         const auto todoProperties{createProperties("Buy Milk",
-                "make of almonds!", timestampInitialValue++)};
+                                                   "make of almonds!", timestampInitialValue++)};
         store.insert(i, todoProperties);
     }
     return store;
@@ -32,7 +32,7 @@ TEST_CASE("Basic store")
 {
     constexpr auto id{totalTodos};
     const auto properties{createProperties("Buy Milk",
-                                               "make of almonds!", 2392348.12233)};
+                                           "make of almonds!", 2392348.12233)};
     ParentStore store{createDummyStore()};
 
     BENCHMARK("inserting")
@@ -49,12 +49,7 @@ TEST_CASE("Basic store")
 
     BENCHMARK("retrieving properties")
                 {
-                    return store.get(0);
-                };
-
-    BENCHMARK("removing")
-                {
-                    return store.remove(0);
+                    return store.get(id);
                 };
 }
 

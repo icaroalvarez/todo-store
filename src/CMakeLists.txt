@@ -9,6 +9,6 @@ set(source_files
         DoublePropertyIds
         )
 
-add_library(entity_store
+add_library(todo_store
         ${source_files}
         )
